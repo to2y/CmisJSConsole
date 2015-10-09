@@ -3,7 +3,10 @@ package jp.aegif.oc.cmis_js_console;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.chemistry.opencmis.client.api.CmisObject;
+import org.apache.chemistry.opencmis.client.api.ItemIterable;
 import org.apache.chemistry.opencmis.client.api.ObjectType;
+import org.apache.chemistry.opencmis.client.api.QueryResult;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.client.api.Tree;
 import org.apache.chemistry.opencmis.commons.definitions.TypeDefinition;
@@ -51,5 +54,18 @@ public class CmisRepository {
 		
 	}
 	
+	public CmisNode[] searchSimple(String query, boolean searchAllVersions) {
+		ItemIterable<QueryResult> results = this.session.query(query, searchAllVersions);
+		
+		List<CmisNode> resultNodes = new ArrayList<CmisNode>();
+		
+		for(QueryResult result : results) {
+			String objectId = (String)result.getPropertyByQueryName("cmis:objectId").getFirstValue();
+			CmisObject cmisObject = this.session.getObject(objectId);
+			resultNodes.add(new CmisNode(cmisObject, this.session));
+		}
+		
+		return resultNodes.toArray(new CmisNode[0]);
+	}
 	
 }

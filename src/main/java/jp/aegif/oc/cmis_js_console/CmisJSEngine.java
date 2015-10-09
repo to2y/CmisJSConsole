@@ -1,6 +1,10 @@
 package jp.aegif.oc.cmis_js_console;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 
@@ -31,6 +35,26 @@ public class CmisJSEngine {
 		finally {
 			Context.exit();
 		}
+	}
+	
+	public static void main(String[] args) throws Exception {
+		//read commandLine argument file
+		if ( args.length < 1) {
+			throw new RuntimeException("please specify script file");
+		}
+		
+		File file = new File(args[0]);
+		
+		if ( !file.exists() ) {
+			throw new RuntimeException("script file does not exists");
+		}
+		
+		FileInputStream fis = new FileInputStream(file);
+		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+		BufferedReader reader = new BufferedReader(isr); 
+		
+		//exec
+		CmisJSEngine.eval(reader, args[0]); 
 	}
 		
 }

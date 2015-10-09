@@ -30,6 +30,13 @@ public class CmisEmbedTest extends TestCase {
 		
 	}	
 	
+	public void testSearch() throws IllegalAccessException, InstantiationException, InvocationTargetException {
+		
+		BufferedReader in = this.getReader("/testCmisScriptSearch.js");		
+		CmisJSEngine.eval(in, "testCmisScriptSearch.js");
+		
+	}		
+	
 	private BufferedReader getReader(String scriptFilePath) {
         return new BufferedReader(
                 new InputStreamReader(getClass().getResourceAsStream(scriptFilePath)));
