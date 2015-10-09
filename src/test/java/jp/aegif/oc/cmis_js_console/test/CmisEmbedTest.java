@@ -12,28 +12,28 @@ public class CmisEmbedTest extends TestCase {
 	public void testRhinoRunFromFile() throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		
 		BufferedReader in = this.getReader("/testCmisScript1.js");		
-		CmisJSEngine.eval(in, "testCmisScript1.js");
+		CmisJSEngine.newInstance().eval(in, "testCmisScript1.js");
 		
 	}
 	
 	public void testTypesRunFromFile() throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		
 		BufferedReader in = this.getReader("/testCmisScript2.js");		
-		CmisJSEngine.eval(in, "testCmisScript2.js");
+		CmisJSEngine.newInstance().eval(in, "testCmisScript2.js");
 		
 	}
 	
 	public void testTCheckOutIn() throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		
 		BufferedReader in = this.getReader("/testCmisScript3.js");		
-		CmisJSEngine.eval(in, "testCmisScript3.js");
+		CmisJSEngine.newInstance().eval(in, "testCmisScript3.js");
 		
 	}	
 	
 	public void testSearch() throws IllegalAccessException, InstantiationException, InvocationTargetException {
 		
 		BufferedReader in = this.getReader("/testCmisScriptSearch.js");		
-		CmisJSEngine.eval(in, "testCmisScriptSearch.js");
+		CmisJSEngine.newInstance().eval(in, "testCmisScriptSearch.js");
 		
 	}		
 	

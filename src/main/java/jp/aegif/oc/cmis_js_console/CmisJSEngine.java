@@ -8,15 +8,24 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 
+import java.util.Map;
+
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
 
 public class CmisJSEngine {
 
-	public static void eval(Reader reader, String scriptName) throws IllegalAccessException, InstantiationException, InvocationTargetException {
-		Context cx = Context.enter();
-		Scriptable scope = cx.initStandardObjects();
+	private Scriptable scope;
+	private Context cx;
+
+	public static CmisJSEngine newInstance() {
+		return new CmisJSEngine();
+	}
+
+	private void prepareContext() {
+		cx = Context.enter();
+		scope = cx.initStandardObjects();
 
 		//cmis session factory
 		CmisSessionFactory cmisSessionFactory = new CmisSessionFactory();
@@ -26,7 +35,17 @@ public class CmisJSEngine {
 		//System.out
 		Object wrappedOut = Context.javaToJS(System.out, scope);
 		ScriptableObject.putProperty(scope, "out", wrappedOut);
+	}
 
+	public void eval(Reader reader, String scriptName) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+
+		this.prepareContext();
+
+		this.evalInternal(reader, scriptName);
+	}
+	
+	
+	private void evalInternal(Reader reader, String scriptName) {
 		try {
 			cx.evaluateReader(scope, reader, scriptName, 0, null);
 		} catch (IOException e) {
@@ -34,27 +53,46 @@ public class CmisJSEngine {
 		}
 		finally {
 			Context.exit();
-		}
+		}	
 	}
-	
+
+
+	public void eval(String filePath, Map params) throws Exception {
+		this.prepareContext();
+		
+		//inject parameter map
+
+		Object paramsJS = Context.javaToJS(params, scope);
+		ScriptableObject.putProperty(scope, "params", paramsJS);
+
+		Reader reader = getReaderFromFilePath(filePath);
+		this.evalInternal(reader, filePath);
+	}
+
+	public static Reader getReaderFromFilePath(String filePath) throws IOException {
+		File file = new File(filePath);
+
+		if ( !file.exists() ) {
+			throw new RuntimeException("script file does not exists");
+		}
+
+		FileInputStream fis = new FileInputStream(file);
+		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
+		BufferedReader reader = new BufferedReader(isr);
+
+		return reader;
+	}
+
 	public static void main(String[] args) throws Exception {
 		//read commandLine argument file
 		if ( args.length < 1) {
 			throw new RuntimeException("please specify script file");
 		}
-		
-		File file = new File(args[0]);
-		
-		if ( !file.exists() ) {
-			throw new RuntimeException("script file does not exists");
-		}
-		
-		FileInputStream fis = new FileInputStream(file);
-		InputStreamReader isr = new InputStreamReader(fis, "UTF-8");
-		BufferedReader reader = new BufferedReader(isr); 
-		
+
+		Reader reader = getReaderFromFilePath(args[0]);
+
 		//exec
-		CmisJSEngine.eval(reader, args[0]); 
+		CmisJSEngine.newInstance().eval(reader, args[0]); 
 	}
-		
+
 }
