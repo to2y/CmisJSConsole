@@ -31,5 +31,12 @@ for(var key in versions) {
 	out.println(versions[key].name);
 	out.println(JSON.stringify(versions[key].versionInfo));
 }
+perms = doc1.permissions;
+for(var key in perms) {
+	out.println(perms[key].principal);
+	for(var k2 in perms[key].permissions) {
+		out.println(" - " + perms[key].permissions[k2]);
+	}
+}
 
-//f2.remove(true);
+f2.remove(true);

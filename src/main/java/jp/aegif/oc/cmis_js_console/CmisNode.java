@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.chemistry.opencmis.client.api.CmisObject;
 import org.apache.chemistry.opencmis.client.api.DocumentType;
@@ -21,10 +22,14 @@ import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.client.api.Property;
 import org.apache.chemistry.opencmis.client.api.Session;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
+import org.apache.chemistry.opencmis.commons.data.Ace;
+import org.apache.chemistry.opencmis.commons.data.Acl;
+import org.apache.chemistry.opencmis.commons.data.CmisExtensionElement;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.enums.Updatability;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
+import org.mozilla.javascript.NativeArray;
 import org.mozilla.javascript.NativeObject;
 
 
@@ -33,6 +38,7 @@ public class CmisNode {
 	private CmisObject cmisObject;
 	private Session session;
 	private NativeObject propsObj;
+	private NativeArray aclObj;
 
 	public CmisNode() {}
 
@@ -303,5 +309,43 @@ public class CmisNode {
 		versionInfo.put("checkinComment", versionInfo, doc.getCheckinComment());
 		
 		return versionInfo;
+	}
+	
+	private void getPermissionsInternal() {
+		Acl acl = this.cmisObject.getAcl();
+		List<Ace> aces = acl.getAces();
+		
+		this.aclObj = new NativeArray(aces.size());
+		for(int j = 0 ; j < aces.size() ; j++ ) {
+			Ace ace = aces.get(j);
+			String principal = ace.getPrincipalId();
+			List<String> permissions = ace.getPermissions();
+			NativeArray permArray = new NativeArray(permissions.size());
+			for(int i = 0 ; i < permissions.size() ; i++ ) {
+				permArray.put(i, permArray, permissions.get(i));
+			}
+			
+			NativeObject aceObj = new NativeObject();
+			aceObj.put("principal", aceObj, principal);
+			aceObj.put("permissions", aceObj, permArray);
+			
+			aclObj.put(j, aclObj, aceObj);
+		}
+	}
+	
+	public NativeArray getPermissions() {
+		if ( this.aclObj == null) {
+			this.getPermissionsInternal();
+		}
+		return this.aclObj;
+	}
+	
+	//TODO implement
+	public void addPermission(String principal, String permission) {
+		
+	}
+	
+	public void removePermission(String principal, String permission) {
+		
 	}
 }
